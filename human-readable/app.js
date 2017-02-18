@@ -1,70 +1,70 @@
-e = document.createElement('div');
-e.innerHTML = '<input style="position:fixed;z-index:9;top:0;width:99%;" placeholder="paste here">';
-b.appendChild(e);
-e.querySelector('input').onchange = function(e) {
+var element = document.createElement('div');
+element.innerHTML = '<input style="position:fixed;z-index:9;top:0;width:99%;" placeholder="paste here">';
+b.appendChild(element);
+element.querySelector('input').onchange = function(e) {
     try {
-        j = JSON.parse(e.target.value);
-        p = Math.PI/180;
-        o = [a.width * j.orig.x, a.height * j.orig.y],
-        r = parseRules(j.rules),
-        z = createCompiler(j.angle*p),
-        k = grow(j.start, r, j.n),
-        h = z(k);
+        var input = JSON.parse(e.target.value),
+            rad = Math.PI/180,
+            origin = [a.width * input.orig.x, a.height * input.orig.y],
+            rules = parseRules(input.rules),
+            compile = createCompiler(input.angle * rad),
+            result = grow(input.start, rules, input.n),
+            actions = compile(result);
         c.save();
         c.clearRect(0, 0, a.width, a.height);
-        drawScene(h, j.step, o, j.dir*p);
+        drawScene(actions, input.step, origin, input.dir * rad);
         c.restore();
     } catch (e) {}
 };
 
 function grow(a, r, n) {
     if (!n) return a;
-    y = a.split('').map(function(v) {
+    var result = a.split('').map(function(v) {
         return r[v] ? r[v] : v;
     }).join('');
-    return grow(y, r, n - 1);
+    return grow(result, r, n - 1);
 }
 
 function parseRules(arr) {
     return arr.reduce(function(acc, s) {
-        x = s.split('=');
-        acc[x[0]] = x[1];
+        var rule = s.split('=');
+        acc[rule[0]] = rule[1];
         return acc;
     }, {});
 }
 
 function createCompiler(rad) {
-    u = rad * -1;
+    var negRad = rad * -1;
     return function(rule) {
-        w = {
+        var actions = {
             '+': {
-                a: rad,
-                m: 0,
-                d: 0
+                angle: rad,
+                move: 0,
+                draw: 0
             },
             '-': {
-                a: u,
-                m: 0,
-                d: 0
+                angle: negRad,
+                move: 0,
+                draw: 0
             },
             'F': {
-                a: 0,
-                m: 1,
-                d: 1
+                angle: 0,
+                move: 1,
+                draw: 1
             },
             'G': {
-                a: 0,
-                m: 1,
-                d: 1
+                angle: 0,
+                move: 1,
+                draw: 1
             },
             'M': {
-                a: 0,
-                m: 1,
-                d: 0
+                angle: 0,
+                move: 1,
+                draw: 0
             }
         };
         return rule.split('').map(function(v) {
-            return w[v] ? w[v] : v;
+            return actions[v] ? actions[v] : v;
         });
     };
 }
@@ -73,16 +73,16 @@ function drawScene(acts, step, orig, initDir) {
     c.translate(orig[0], orig[1]);
     c.beginPath();
     c.rotate(initDir);
-    for (i = 0, l = acts.length; i < l; i++) {
+    for (var act, action, i = 0, l = acts.length; i < l; i++) {
         if ( i > 120000 ) {
             c.stroke();
             return;
         }
-        g = acts[i];
-        c.rotate(g.a);
-        if (g.m) {
-            m = g.d ? 'lineTo' : 'moveTo';
-            c[m](step, 0);
+        act = acts[i];
+        c.rotate(act.angle);
+        if (act.move) {
+            action = act.draw ? 'lineTo' : 'moveTo';
+            c[action](step, 0);
             c.translate(step, 0);
         }
     }
