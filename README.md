@@ -1,6 +1,6 @@
 ## L-systems under a kilobyte
 
-### Introduction
+## Introduction
 
 This app is an entry into the [js1k-2017](http://js1k.com/2017-magic/) competition. It implements the [Lindenmayer system](https://en.wikipedia.org/wiki/L-system) with less than 1024 bytes. It has some understandable limitations though :stuck_out_tongue_winking_eye:
 
