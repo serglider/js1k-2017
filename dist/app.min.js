@@ -1,21 +1,40 @@
-e = document.createElement('div');
-e.innerHTML = '<input style="position:fixed;z-index:9;top:0;width:99%;" placeholder="paste here">';
+e = document.createElement('input');
+e.style = 'position:fixed;z-index:9;top:0;padding:5px;width:99%;';
+e.placeholder = 'PASTE HERE';
 b.appendChild(e);
-e.querySelector('input').onchange = function(e) {
-    try {
-        j = JSON.parse(e.target.value);
-        p = Math.PI/180;
-        o = [a.width * j.orig.x, a.height * j.orig.y],
-        r = parseRules(j.rules),
-        z = createCompiler(j.angle*p),
-        k = grow(j.start, r, j.n),
-        h = z(k);
-        c.save();
-        c.clearRect(0, 0, a.width, a.height);
-        drawScene(h, j.step, o, j.dir*p);
-        c.restore();
-    } catch (e) {}
-};
+e.onchange = rr;
+rr();
+
+function rr(j) {
+    p = Math.PI / 180;
+    if (j) {
+        try {
+            j = JSON.parse(j.target.value);
+        } catch (e) {}
+    }else {
+        j = {
+            step: 5,
+            dir: 0,
+            start: 'F',
+            n: 5,
+            angle: 90,
+            orig: {
+                x: 0,
+                y: 0
+            },
+            rules: ['F=F+F-F-F+F']
+        };
+    }
+    o = [a.width * j.orig.x, a.height * j.orig.y];
+    r = pr(j.rules);
+    z = cc(j.angle * p);
+    k = grow(j.start, r, j.n);
+    h = z(k);
+    c.save();
+    c.clearRect(0, 0, a.width, a.height);
+    ds(j.step, j.dir * p);
+    c.restore();
+}
 
 function grow(a, r, n) {
     if (!n) return a;
@@ -25,7 +44,7 @@ function grow(a, r, n) {
     return grow(y, r, n - 1);
 }
 
-function parseRules(arr) {
+function pr(arr) {
     return arr.reduce(function(acc, s) {
         x = s.split('=');
         acc[x[0]] = x[1];
@@ -33,8 +52,7 @@ function parseRules(arr) {
     }, {});
 }
 
-function createCompiler(rad) {
-    u = rad * -1;
+function cc(rad) {
     return function(rule) {
         w = {
             '+': {
@@ -43,7 +61,7 @@ function createCompiler(rad) {
                 d: 0
             },
             '-': {
-                a: u,
+                a: rad * -1,
                 m: 0,
                 d: 0
             },
@@ -69,16 +87,12 @@ function createCompiler(rad) {
     };
 }
 
-function drawScene(acts, step, orig, initDir) {
-    c.translate(orig[0], orig[1]);
+function ds(step, initDir) {
+    c.translate(o[0], o[1]);
     c.beginPath();
     c.rotate(initDir);
-    for (i = 0, l = acts.length; i < l; i++) {
-        if ( i > 120000 ) {
-            c.stroke();
-            return;
-        }
-        g = acts[i];
+    for (i = 0, l = h.length; i < l; i++) {
+        g = h[i];
         c.rotate(g.a);
         if (g.m) {
             m = g.d ? 'lineTo' : 'moveTo';

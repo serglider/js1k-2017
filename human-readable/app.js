@@ -1,21 +1,40 @@
 var element = document.createElement('div');
 element.innerHTML = '<input style="position:fixed;z-index:9;top:0;width:99%;" placeholder="paste here">';
 b.appendChild(element);
-element.querySelector('input').onchange = function(e) {
-    try {
-        var input = JSON.parse(e.target.value),
-            rad = Math.PI/180,
-            origin = [a.width * input.orig.x, a.height * input.orig.y],
-            rules = parseRules(input.rules),
-            compile = createCompiler(input.angle * rad),
-            result = grow(input.start, rules, input.n),
-            actions = compile(result);
-        c.save();
-        c.clearRect(0, 0, a.width, a.height);
-        drawScene(actions, input.step, origin, input.dir * rad);
-        c.restore();
-    } catch (e) {}
-};
+element.querySelector('input').onchange = run;
+
+run();
+
+function run(j) {
+    var rad =  Math.PI/180;
+    if ( j ) {
+        try {
+            j = JSON.parse(j.target.value);
+        } catch (e) {}
+    }else {
+        j = {
+            step: 5,
+            dir: 0,
+            start: 'F',
+            n: 5,
+            angle: 90,
+            orig: {
+                x: 0,
+                y: 0
+            },
+            rules: ['F=F+F-F-F+F']
+        };
+    }
+    var origin = [a.width * j.orig.x, a.height * j.orig.y],
+        rules = parseRules(j.rules),
+        compile = createCompiler(j.angle * rad),
+        result = grow(j.start, rules, j.n),
+        actions = compile(result);
+    c.save();
+    c.clearRect(0, 0, a.width, a.height);
+    drawScene(actions, j.step, origin, j.dir * rad);
+    c.restore();
+}
 
 function grow(a, r, n) {
     if (!n) return a;
@@ -74,10 +93,6 @@ function drawScene(acts, step, orig, initDir) {
     c.beginPath();
     c.rotate(initDir);
     for (var act, action, i = 0, l = acts.length; i < l; i++) {
-        if ( i > 120000 ) {
-            c.stroke();
-            return;
-        }
         act = acts[i];
         c.rotate(act.angle);
         if (act.move) {
