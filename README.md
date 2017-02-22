@@ -1,4 +1,4 @@
-## L-systems under a kilobyte
+# L-systems under a kilobyte
 
 ## Introduction
 
